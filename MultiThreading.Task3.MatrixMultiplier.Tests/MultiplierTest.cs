@@ -26,7 +26,7 @@ namespace MultiThreading.Task3.MatrixMultiplier.Tests
             IMatricesMultiplier matrixMultiplier = new MatricesMultiplier();
             IMatricesMultiplier matrixMultiplierParallel = new MatricesMultiplierParallel();
             Stopwatch sw = new Stopwatch();
-            int i = 100;
+            int i = 20;
             var timeMillieconds = 0L;
             var timeMillisecondsParallel = 0L;
             while (timeMillieconds <= timeMillisecondsParallel)
@@ -48,6 +48,8 @@ namespace MultiThreading.Task3.MatrixMultiplier.Tests
 
                 i++;
             }
+
+            Assert.IsTrue(timeMillieconds > timeMillisecondsParallel);
         }
 
         #region private methods
@@ -102,18 +104,12 @@ namespace MultiThreading.Task3.MatrixMultiplier.Tests
         IMatrix CreateMatrix(int rows, int cols)
         {
            
-            //int minValue = 0;
-            //int maxValue = 1000;
-
-            //Random random = new Random();
-
             var matrix = new Matrix(rows, cols);
             
             for (int i = 0; i < matrix.RowCount; i++)
             {
                 for (int j = 0; j < matrix.ColCount; j++)
                 {
-                    //matrix.SetElement(i, j, random.Next(0, 1000));
                     matrix.SetElement(i, j, 2);
                 }
             }

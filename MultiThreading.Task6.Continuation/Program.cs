@@ -15,7 +15,7 @@ namespace MultiThreading.Task6.Continuation
 {
     class Program
     {
-        static void Main(string[] args)
+        static async Task Main(string[] args)
         {
             Console.WriteLine("Create a Task and attach continuations to it according to the following criteria:");
             Console.WriteLine("a.    Continuation task should be executed regardless of the result of the parent task.");
@@ -61,9 +61,9 @@ namespace MultiThreading.Task6.Continuation
 
                     }
                 }, option, token)
-                .ContinueWith((antecedant) =>
+                .ContinueWith((antecedent) =>
                 {
-                    Console.WriteLine($"Antecedent status: {antecedant.Status}");
+                    Console.WriteLine($"Antecedent status: {antecedent.Status}");
                     Console.WriteLine("Continuation task successful");
                 }, TaskContinuationOptions.None).Wait();
             }
@@ -78,9 +78,9 @@ namespace MultiThreading.Task6.Continuation
                 Console.WriteLine("Parent task throws exception");
                 throw new ArgumentException(); 
             })
-            .ContinueWith((antecedant) =>
+            .ContinueWith((antecedent) =>
             {
-                Console.WriteLine($"Antecedent status: {antecedant.Status}");
+                Console.WriteLine($"Antecedent status: {antecedent.Status}");
                 Console.WriteLine("Continuation successful");
             }, TaskContinuationOptions.NotOnRanToCompletion).Wait();
 
@@ -94,9 +94,9 @@ namespace MultiThreading.Task6.Continuation
                 Console.WriteLine($"Parent task ManagedThreadId: {Thread.CurrentThread.ManagedThreadId}");
                 throw new ArgumentException();
             })
-            .ContinueWith((antecedant) =>
+            .ContinueWith((antecedent) =>
             {
-                Console.WriteLine($"Antecedent status: {antecedant.Status}");
+                Console.WriteLine($"Antecedent status: {antecedent.Status}");
                 Console.WriteLine($"Continuation task ManagedThreadId: {Thread.CurrentThread.ManagedThreadId}");
                 Console.WriteLine("Continuation successful");
             }, TaskContinuationOptions.OnlyOnFaulted & TaskContinuationOptions.ExecuteSynchronously).Wait();
@@ -106,13 +106,12 @@ namespace MultiThreading.Task6.Continuation
 
             //d
             Console.WriteLine("d) Continuation task should be executed outside of the thread pool when the parent task would be cancelled.");
-            Console.WriteLine(Thread.CurrentThread.IsThreadPoolThread);
+           
             var sourceD = new CancellationTokenSource();
             var tokenD = sourceD.Token;
             sourceD.Cancel();
-            var uiThread = TaskScheduler.FromCurrentSynchronizationContext();
 
-            Task.Run(() =>
+            await Task.Run(() =>
             {
                 if (token.IsCancellationRequested)
                 {
@@ -125,7 +124,7 @@ namespace MultiThreading.Task6.Continuation
                 Console.WriteLine($"Antecedent status: {antecedent.Status}");
                 Console.WriteLine($"Continuation thread IsThreadPoolThread: {Thread.CurrentThread.IsThreadPoolThread}");
                 Console.WriteLine("Continuation successful");
-            }, token, TaskContinuationOptions.OnlyOnCanceled, uiThread).Wait();
+            }, TaskContinuationOptions.RunContinuationsAsynchronously);
 
 
             Console.WriteLine("Press any key to continue");

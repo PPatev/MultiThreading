@@ -37,10 +37,10 @@ namespace MultiThreading.Task2.Chaining
                 Random rnd = new Random();
 
                 int arrayLength = 10;
-                decimal[] array = new decimal[arrayLength];
+                int[] array = new int[arrayLength];
                 for (int i = 0; i < array.Length; i++)
                 {
-                    array[i] = rnd.Next();
+                    array[i] = rnd.Next(100);
                 }
 
                 PrintResult(1, string.Join(", ", array));
@@ -50,10 +50,10 @@ namespace MultiThreading.Task2.Chaining
             .ContinueWith((antecedent, obj) =>
             {
                 int? taskNumber = obj as int?;
-                decimal[] array = antecedent.Result;
+                int[] array = antecedent.Result;
 
                 Random rnd = new Random();
-                int randomInteger = rnd.Next();
+                int randomInteger = rnd.Next(100);
 
                 for (int i = 0; i < array.Length; i++)
                 {
@@ -67,7 +67,7 @@ namespace MultiThreading.Task2.Chaining
             .ContinueWith((antecedent, obj) =>
             {
                 int? taskNumber = obj as int?;
-                decimal[] array = antecedent.Result;
+                int[] array = antecedent.Result;
                 Array.Sort(array);
 
                 PrintResult(taskNumber.Value, string.Join(", ", array));
@@ -77,9 +77,9 @@ namespace MultiThreading.Task2.Chaining
             .ContinueWith((antecedent, obj) =>
             {
                 int? taskNumber = obj as int?;
-                decimal[] array = antecedent.Result;
+                int[] array = antecedent.Result;
 
-                decimal average = Queryable.Average(array.AsQueryable());
+                double average = Queryable.Average(array.AsQueryable());
                 PrintResult(taskNumber.Value, average.ToString());
 
                 return average;

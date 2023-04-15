@@ -16,8 +16,8 @@ namespace MultiThreading.Task5.Threads.SharedCollection
         private static List<int> numbers = new List<int>();
         private static int count = 1;
         private static int maxNumber = 10;
-        private static EventWaitHandle handle =
-            new EventWaitHandle(false, EventResetMode.AutoReset);
+        private static EventWaitHandle handle = new EventWaitHandle(false, EventResetMode.AutoReset);
+
         static void Main(string[] args)
         {
             Console.WriteLine("5. Write a program which creates two threads and a shared collection:");
@@ -27,8 +27,8 @@ namespace MultiThreading.Task5.Threads.SharedCollection
 
             // feel free to add your code
             
-            //Thread addThread = new Thread(AddNumbers);
-            //addThread.Start();
+            Thread addThread = new Thread(AddNumbers);
+            addThread.Start();
             Thread printThread = new Thread(PrintNumbers);
             printThread.Start();
             
@@ -48,10 +48,9 @@ namespace MultiThreading.Task5.Threads.SharedCollection
 
         static void PrintNumbers()
         {
-            Thread addThread = new Thread(AddNumbers);
-            addThread.Start();
             while (count <= maxNumber) 
             {
+
                 Console.WriteLine(string.Join(", ", numbers));
                 handle.Set();
             }
