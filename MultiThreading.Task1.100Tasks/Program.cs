@@ -8,12 +8,12 @@ using System.Threading.Tasks;
 
 namespace MultiThreading.Task1._100Tasks
 {
-    class Program
+    public class Program
     {
-        const int TaskAmount = 100;
-        const int MaxIterationsCount = 1000;
+        private const int _taskAmount = 100;
+        private const int _maxIterationsCount = 1000;
 
-        static void Main(string[] args)
+        public static void Main(string[] args)
         {
             Console.WriteLine(".Net Mentoring Program. Multi threading V1.");
             Console.WriteLine("1.	Write a program, which creates an array of 100 Tasks, runs them and waits all of them are not finished.");
@@ -21,34 +21,35 @@ namespace MultiThreading.Task1._100Tasks
             Console.WriteLine("“Task #0 – {iteration number}”.");
             Console.WriteLine();
             
-            HundredTasks();
+            var tasks = CreateTaskArray(_taskAmount, _maxIterationsCount);
+            Task.WaitAll(tasks);
 
             Console.ReadLine();
         }
 
-        static void HundredTasks()
+        private static Task[] CreateTaskArray(int taskArrayLength, int maxIterationsCount)
         {
-            // feel free to add your code here
-            Task[] tasks = new Task[TaskAmount];
+            var tasks = new Task[taskArrayLength];
+
             for (int i = 0; i < tasks.Length; i++)
             {
-                object arg = i;
-                tasks[i] = Task.Factory.StartNew((obj) => 
+                tasks[i] = Task.Factory.StartNew((iteration) => 
                 {
-                    int? taskNumber = obj as int?;
-                    if (taskNumber == null) return;
-
-                    for (int j = 1; j <= MaxIterationsCount; j++)
+                    int? taskNumber = iteration as int?;
+                    if (taskNumber.HasValue)
                     {
-                        Output(taskNumber.Value, j);
+                        for (int j = 1; j <= maxIterationsCount; j++)
+                        {
+                            Output(taskNumber.Value, j);
+                        }
                     }
-                }, arg);
+                }, i);
             }
 
-            Task.WaitAll(tasks);
+            return tasks;
         }
 
-        static void Output(int taskNumber, int iterationNumber)
+        private static void Output(int taskNumber, int iterationNumber)
         {
             Console.WriteLine($"Task #{taskNumber} – {iterationNumber}");
         }

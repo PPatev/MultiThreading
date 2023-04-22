@@ -7,15 +7,14 @@
    Demonstrate the work of the each case with console utility.
 */
 using System;
-using System.Globalization;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace MultiThreading.Task6.Continuation
 {
-    class Program
+    public class Program
     {
-        static async Task Main(string[] args)
+        public static async Task Main(string[] args)
         {
             Console.WriteLine("Create a Task and attach continuations to it according to the following criteria:");
             Console.WriteLine("a.    Continuation task should be executed regardless of the result of the parent task.");

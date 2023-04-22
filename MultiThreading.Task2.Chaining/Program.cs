@@ -12,9 +12,13 @@ using System.Threading.Tasks;
 
 namespace MultiThreading.Task2.Chaining
 {
-    class Program
+    public class Program
     {
-        static void Main(string[] args)
+        private static readonly int _arrayLength = 10;
+
+        private static int _taskNumber = default;
+
+        public static void Main(string[] args)
         {
             Console.WriteLine(".Net Mentoring Program. MultiThreading V1 ");
             Console.WriteLine("2.	Write a program, which creates a chain of four Tasks.");
@@ -25,69 +29,10 @@ namespace MultiThreading.Task2.Chaining
             Console.WriteLine();
 
             // feel free to add your code
-            RandomArrayAverage();
-
-            Console.ReadLine();
-        }
-
-        static void RandomArrayAverage()
-        {
-            var result = Task.Run(() =>
-            {
-                Random rnd = new Random();
-
-                int arrayLength = 10;
-                int[] array = new int[arrayLength];
-                for (int i = 0; i < array.Length; i++)
-                {
-                    array[i] = rnd.Next(100);
-                }
-
-                PrintResult(1, string.Join(", ", array));
-
-                return array;
-            })
-            .ContinueWith((antecedent, obj) =>
-            {
-                int? taskNumber = obj as int?;
-                int[] array = antecedent.Result;
-
-                Random rnd = new Random();
-                int randomInteger = rnd.Next(100);
-
-                for (int i = 0; i < array.Length; i++)
-                {
-                    array[i] *= randomInteger;
-                }
-
-                PrintResult(taskNumber.Value, string.Join(", ", array));
-
-                return array;
-            }, 2, TaskContinuationOptions.OnlyOnRanToCompletion)
-            .ContinueWith((antecedent, obj) =>
-            {
-                int? taskNumber = obj as int?;
-                int[] array = antecedent.Result;
-                Array.Sort(array);
-
-                PrintResult(taskNumber.Value, string.Join(", ", array));
-
-                return array;
-            }, 3, TaskContinuationOptions.OnlyOnRanToCompletion)
-            .ContinueWith((antecedent, obj) =>
-            {
-                int? taskNumber = obj as int?;
-                int[] array = antecedent.Result;
-
-                double average = Queryable.Average(array.AsQueryable());
-                PrintResult(taskNumber.Value, average.ToString());
-
-                return average;
-            }, 4, TaskContinuationOptions.OnlyOnRanToCompletion);
-
             try
             {
-                result.Wait();
+                var task = RandomArrayAverage();
+                task.Wait();
             }
             catch (AggregateException ex)
             {
@@ -103,12 +48,79 @@ namespace MultiThreading.Task2.Chaining
                     }
                 }
             }
-           
+
+            Console.ReadLine();
         }
 
-        static void PrintResult(int taskNumber, string result)
+        private static Task RandomArrayAverage()
         {
-            Console.WriteLine($"Task #{taskNumber} – {result}");
+            var task = Task.Run(() => CreateRandomIntegerArray())
+            .ContinueWith((antecedent) => MultiplyArrayWithRandomInteger(antecedent), TaskContinuationOptions.OnlyOnRanToCompletion)
+            .ContinueWith((antecedent) => SortArrayAscending(antecedent), TaskContinuationOptions.OnlyOnRanToCompletion)
+            .ContinueWith((antecedent) => CalculateArrayAverage(antecedent), TaskContinuationOptions.OnlyOnRanToCompletion);
+
+            return task;
+        }
+
+        private static int[] CreateRandomIntegerArray()
+        {
+            var rnd = new Random();
+
+            var array = new int[_arrayLength];
+            for (int i = 0; i < array.Length; i++)
+            {
+                array[i] = rnd.Next(0, 100);
+            }
+
+            Interlocked.Increment(ref _taskNumber);
+            PrintTaskResult(string.Join(", ", array));
+
+            return array;
+        }
+
+        private static int[] MultiplyArrayWithRandomInteger(Task<int[]> antecedent)
+        {
+            var array = antecedent.Result;
+
+            var rnd = new Random();
+            var randomInteger = rnd.Next(100);
+
+            for (int i = 0; i < array.Length; i++)
+            {
+                array[i] *= randomInteger;
+            }
+
+            Interlocked.Increment(ref _taskNumber);
+            PrintTaskResult(string.Join(", ", array));
+
+            return array;
+        }
+
+        private static int[] SortArrayAscending(Task<int[]> antecedent)
+        {
+            var array = antecedent.Result;
+            Array.Sort(array);
+
+            Interlocked.Increment(ref _taskNumber);
+            PrintTaskResult(string.Join(", ", array));
+
+            return array;
+        }
+
+        private static double CalculateArrayAverage(Task<int[]> antecedent)
+        {
+            var array = antecedent.Result;
+            var average = Queryable.Average(array.AsQueryable());
+
+            Interlocked.Increment(ref _taskNumber);
+            PrintTaskResult(average.ToString());
+
+            return average;
+        }
+
+        private static void PrintTaskResult(string result)
+        {
+            Console.WriteLine($"Task #{_taskNumber} – {result}");
         }
     }
 }

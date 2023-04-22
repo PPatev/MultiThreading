@@ -7,18 +7,21 @@
 using System;
 using System.Collections.Generic;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace MultiThreading.Task5.Threads.SharedCollection
 {
-    class Program
+    public class Program
     {
-        private static List<int> numbers = new List<int>();
-        private static int count = 1;
-        private static int maxNumber = 10;
-        private static EventWaitHandle handle = new EventWaitHandle(false, EventResetMode.AutoReset);
+        private static List<int> _numbers = new List<int>();
+        private static int _count = 1;
+        private static int _maxNumber = 10;
 
-        static void Main(string[] args)
+        private static EventWaitHandle _firstHandle = new AutoResetEvent(false);
+        private static EventWaitHandle _secondHandle = new AutoResetEvent(true);
+
+        private static object _lock = new object();
+
+        public static void Main(string[] args)
         {
             Console.WriteLine("5. Write a program which creates two threads and a shared collection:");
             Console.WriteLine("the first one should add 10 elements into the collection and the second should print all elements in the collection after each adding.");
@@ -26,33 +29,40 @@ namespace MultiThreading.Task5.Threads.SharedCollection
             Console.WriteLine();
 
             // feel free to add your code
-            
-            Thread addThread = new Thread(AddNumbers);
+
+            var addThread = new Thread(AddNumbers);
             addThread.Start();
-            Thread printThread = new Thread(PrintNumbers);
+            var printThread = new Thread(PrintNumbers);
             printThread.Start();
-            
 
             Console.ReadLine();
         }
 
-        static void AddNumbers()
+        private static void AddNumbers()
         {
-            while (count <= maxNumber) 
+            while (_count <= _maxNumber) 
             {
-                numbers.Add(count);
-                handle.WaitOne();
-                Interlocked.Increment(ref count);
+                _secondHandle.WaitOne();
+                lock (_lock) 
+                {
+                    _numbers.Add(_count);
+                }
+                
+                _firstHandle.Set();
+                Interlocked.Increment(ref _count);
             }
         }
 
-        static void PrintNumbers()
+        private static void PrintNumbers()
         {
-            while (count <= maxNumber) 
+            while (_count <= _maxNumber) 
             {
-
-                Console.WriteLine(string.Join(", ", numbers));
-                handle.Set();
+                _firstHandle.WaitOne();
+                lock (_lock)
+                {
+                    Console.WriteLine(string.Join(", ", _numbers));
+                }
+                _secondHandle.Set();
             }
         }
     }

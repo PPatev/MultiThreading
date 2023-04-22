@@ -7,6 +7,7 @@
  */
 
 using System;
+using MultiThreading.Task3.MatrixMultiplier.Helpers;
 using MultiThreading.Task3.MatrixMultiplier.Matrices;
 using MultiThreading.Task3.MatrixMultiplier.Multipliers;
 
@@ -28,7 +29,9 @@ namespace MultiThreading.Task3.MatrixMultiplier
         {
             Console.WriteLine("Multiplying...");
             var firstMatrix = new Matrix(sizeOfMatrix, sizeOfMatrix);
+            MatrixHelper.PopulateMatrix(firstMatrix);
             var secondMatrix = new Matrix(sizeOfMatrix, sizeOfMatrix);
+            MatrixHelper.PopulateMatrix(secondMatrix);
 
             IMatrix resultMatrix = new MatricesMultiplier().Multiply(firstMatrix, secondMatrix);
 
@@ -38,6 +41,11 @@ namespace MultiThreading.Task3.MatrixMultiplier
             secondMatrix.Print();
             Console.WriteLine("resultMatrix:");
             resultMatrix.Print();
+
+            Console.WriteLine("Multiplying in parallel...");
+            IMatrix resultMatrixParallel = new MatricesMultiplierParallel().Multiply(firstMatrix, secondMatrix);
+            Console.WriteLine("resultMatrix with parallel:");
+            resultMatrixParallel.Print();
         }
     }
 }
