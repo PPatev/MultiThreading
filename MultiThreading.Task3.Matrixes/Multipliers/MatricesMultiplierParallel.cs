@@ -1,6 +1,5 @@
 ﻿using MultiThreading.Task3.MatrixMultiplier.Matrices;
 using System.Threading.Tasks;
-using System;
 
 namespace MultiThreading.Task3.MatrixMultiplier.Multipliers
 {
@@ -10,6 +9,7 @@ namespace MultiThreading.Task3.MatrixMultiplier.Multipliers
         {
             // todo: feel free to add your code here
             var resultMatrix = new Matrix(m1.RowCount, m2.ColCount);
+
             Parallel.For(0, m1.RowCount, i =>
             {
                 for (byte j = 0; j < m2.ColCount; j++)
@@ -19,6 +19,7 @@ namespace MultiThreading.Task3.MatrixMultiplier.Multipliers
                     {
                         sum += m1.GetElement(i, k) * m2.GetElement(k, j);
                     }
+
                     resultMatrix.SetElement(i, j, sum);
                 }
             });

@@ -1,7 +1,7 @@
 using System;
 using System.Diagnostics;
-using System.Net.Http.Headers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using MultiThreading.Task3.MatrixMultiplier.Helpers;
 using MultiThreading.Task3.MatrixMultiplier.Matrices;
 using MultiThreading.Task3.MatrixMultiplier.Multipliers;
 
@@ -22,17 +22,21 @@ namespace MultiThreading.Task3.MatrixMultiplier.Tests
         {
             // todo: implement a test method to check the size of the matrix which makes parallel multiplication more effective than
             // todo: the regular one
-
+           
             IMatricesMultiplier matrixMultiplier = new MatricesMultiplier();
             IMatricesMultiplier matrixMultiplierParallel = new MatricesMultiplierParallel();
             Stopwatch sw = new Stopwatch();
-            int i = 20;
+
+            var size = 2;
             var timeMillieconds = 0L;
             var timeMillisecondsParallel = 0L;
+
             while (timeMillieconds <= timeMillisecondsParallel)
             {
-                var m1 = CreateMatrix(i, i);
-                var m2 = CreateMatrix(i, i);
+                //writes to debug output only in debug mode
+                Debug.WriteLine($"Comparing performance for matrices with size {size}");
+                var m1 = CreateMatrix(size, size);
+                var m2 = CreateMatrix(size, size);
                 
                 sw.Start();
                 matrixMultiplierParallel.Multiply(m1, m2);
@@ -46,15 +50,18 @@ namespace MultiThreading.Task3.MatrixMultiplier.Tests
                 timeMillieconds = sw.ElapsedMilliseconds;
                 sw.Reset();
 
-                i++;
+                size++;
             }
 
+            Debug.WriteLine($"Performance for parallel exceeded sequential for matrices of size: {--size}");
+            Debug.WriteLine($"Time parallel: {timeMillisecondsParallel} ms");
+            Debug.WriteLine($"Time sequential: {timeMillieconds} ms");
             Assert.IsTrue(timeMillieconds > timeMillisecondsParallel);
         }
 
         #region private methods
 
-        void TestMatrix3On3(IMatricesMultiplier matrixMultiplier)
+        private void TestMatrix3On3(IMatricesMultiplier matrixMultiplier)
         {
             if (matrixMultiplier == null)
             {
@@ -101,18 +108,10 @@ namespace MultiThreading.Task3.MatrixMultiplier.Tests
             Assert.AreEqual(728, multiplied.GetElement(2, 2));
         }
 
-        IMatrix CreateMatrix(int rows, int cols)
+        private IMatrix CreateMatrix(int rows, int cols)
         {
-           
             var matrix = new Matrix(rows, cols);
-            
-            for (int i = 0; i < matrix.RowCount; i++)
-            {
-                for (int j = 0; j < matrix.ColCount; j++)
-                {
-                    matrix.SetElement(i, j, 2);
-                }
-            }
+            MatrixHelper.PopulateMatrix(matrix);
 
             return matrix;
         }

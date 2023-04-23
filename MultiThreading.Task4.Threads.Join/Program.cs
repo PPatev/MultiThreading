@@ -14,10 +14,11 @@ using System.Threading;
 
 namespace MultiThreading.Task4.Threads.Join
 {
-    class Program
+    public class Program
     {
-        private static Semaphore _pool;
-        static void Main(string[] args)
+        private static Semaphore _semaphore;
+
+        public static void Main(string[] args)
         {
             Console.WriteLine("4.	Write a program which recursively creates 10 threads.");
             Console.WriteLine("Each thread should be with the same body and receive a state with integer number, decrement it, print and pass as a state into the newly created thread.");
@@ -29,46 +30,46 @@ namespace MultiThreading.Task4.Threads.Join
             Console.WriteLine();
 
             // feel free to add your code
-            Thread thread = new Thread(new ParameterizedThreadStart(DecrementNumber));
+            var thread = new Thread(new ParameterizedThreadStart(DecrementNumber));
             thread.Start(10);
             thread.Join();
 
-            _pool = new Semaphore(initialCount: 0, maximumCount: 1);
+            _semaphore = new Semaphore(initialCount: 0, maximumCount: 1);
+
             ThreadPool.QueueUserWorkItem(DecrementNumberSemaphore, 10);
-            _pool.Release(releaseCount: 1 );
+
+            _semaphore.Release(releaseCount: 1 );
 
             Console.ReadLine();
         }
 
-        static void DecrementNumber(object data)
+        private static void DecrementNumber(object data)
         {
-            int iteration = (int)data;
-            if (iteration == 0)
+            var iteration = (int)data;
+            if (iteration > 0)
             {
-                return;
+                Console.WriteLine(iteration);
+                Interlocked.Decrement(ref iteration);
+
+                var thread = new Thread(new ParameterizedThreadStart(DecrementNumber));
+                thread.Start(iteration);
+                thread.Join();
             }
-
-            Console.WriteLine(iteration);
-            Interlocked.Decrement(ref iteration);
-
-            Thread thread = new Thread(new ParameterizedThreadStart(DecrementNumber));
-            thread.Start(iteration);
-            thread.Join();
         }
 
-        static void DecrementNumberSemaphore(object data)
+        private static void DecrementNumberSemaphore(object data)
         {
-            _pool.WaitOne();
+            _semaphore.WaitOne();
             int iteration = (int)data;
             if (iteration == 0)
             {
-                _pool.Release();
+                _semaphore.Release();
                 return;
             }
 
             Console.WriteLine(iteration);
             Interlocked.Decrement(ref iteration);
-            _pool.Release();
+            _semaphore.Release();
 
             ThreadPool.QueueUserWorkItem(DecrementNumberSemaphore, iteration);
         }
